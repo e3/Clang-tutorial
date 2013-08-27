@@ -80,7 +80,7 @@ int main()
             llvm::outs(),
             &diagnosticOptions,
             true);
-    ci.createDiagnostics(pTextDiagnosticPrinter);
+    ci.createDiagnostics();
 
     llvm::IntrusiveRefCntPtr<TargetOptions> pto( new TargetOptions());
     pto->Triple = llvm::sys::getDefaultTargetTriple();
@@ -89,14 +89,61 @@ int main()
 
     ci.createFileManager();
     ci.createSourceManager(ci.getFileManager());
+
+    ci.getLangOpts().GNUMode = 1;
+    ci.getLangOpts().CXXExceptions = 1;
+    ci.getLangOpts().RTTI = 1;
+    ci.getLangOpts().Bool = 1;
+    ci.getLangOpts().CPlusPlus = 1;
+
+		clang::LangOptions zzz = ci.getLangOpts();
+
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6/x86_64-linux-gnu/",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6/backward",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/local/include",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/local/lib/clang/3.3/include",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/include/x86_64-linux-gnu",
+        clang::frontend::Angled,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/include",
+        clang::frontend::Angled,
+        false,
+        false);
+
+    clang::CompilerInvocation::setLangDefaults(ci.getLangOpts(), clang::IK_CXX);
+
     ci.createPreprocessor();
     ci.getPreprocessorOpts().UsePredefines = false;
+
+    ci.getPreprocessor().getBuiltinInfo().InitializeBuiltins(
+        ci.getPreprocessor().getIdentifierTable(),
+        ci.getPreprocessor().getLangOpts());
+
+
     MyASTConsumer *astConsumer = new MyASTConsumer();
     ci.setASTConsumer(astConsumer);
 
     ci.createASTContext();
 
-	const FileEntry *pFile = ci.getFileManager().getFile("input04.c");
+    const FileEntry *pFile = ci.getFileManager().getFile("foobar.cpp");
+
     ci.getSourceManager().createMainFileID(pFile);
     ci.getDiagnosticClient().BeginSourceFile(ci.getLangOpts(),
                                              &ci.getPreprocessor());
