@@ -1,25 +1,14 @@
-CXX := clang++
+#CXX := clang++
+CXX := /opt/pkg/llvm/bin/clang++
 LLVMCOMPONENTS := cppbackend
 RTTIFLAG := -fno-rtti
-LLVMCONFIG := llvm-config
+#LLVMCONFIG := llvm-config
+LLVMCONFIG := /opt/pkg/llvm/bin/llvm-config
 
 CXXFLAGS := $(shell $(LLVMCONFIG) --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell $(LLVMCONFIG) --ldflags --libs $(LLVMCOMPONENTS))
 
-SOURCES = tutorial1.cpp \
-    tutorial2.cpp \
-    tutorial3.cpp \
-    tutorial4.cpp \
-    tutorial6.cpp \
-    CItutorial1.cpp \
-    CItutorial2.cpp \
-    CItutorial3.cpp \
-    CItutorial4.cpp \
-    CItutorial6.cpp \
-    CIBasicRecursiveASTVisitor.cpp \
-    CIrewriter.cpp \
-		ToolingTutorial.cpp \
-		CommentHandling.cpp
+SOURCES = CItutorial6.cpp \
 
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)

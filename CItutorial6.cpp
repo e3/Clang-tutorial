@@ -60,7 +60,7 @@ public:
 /******************************************************************************
  *
  *****************************************************************************/
-int main()
+int main(int argc, char* argv[])
 {
     using clang::CompilerInstance;
     using clang::TargetOptions;
@@ -80,7 +80,7 @@ int main()
             llvm::outs(),
             &diagnosticOptions,
             true);
-    ci.createDiagnostics();
+    ci.createDiagnostics(argc, argv);
 
     llvm::IntrusiveRefCntPtr<TargetOptions> pto( new TargetOptions());
     pto->Triple = llvm::sys::getDefaultTargetTriple();
@@ -96,34 +96,39 @@ int main()
     ci.getLangOpts().Bool = 1;
     ci.getLangOpts().CPlusPlus = 1;
 
-		clang::LangOptions zzz = ci.getLangOpts();
-
-    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6",
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.4.4",
         clang::frontend::Angled,
         false,
-        false);
-    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6/x86_64-linux-gnu/",
-        clang::frontend::Angled,
         false,
         false);
-    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.6/backward",
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.4.4/i686-redhat-linux/",
         clang::frontend::Angled,
+        false,
+        false,
+        false);
+    ci.getHeaderSearchOpts().AddPath("/usr/include/c++/4.4.4/backward",
+        clang::frontend::Angled,
+        false,
         false,
         false);
     ci.getHeaderSearchOpts().AddPath("/usr/local/include",
         clang::frontend::Angled,
         false,
-        false);
-    ci.getHeaderSearchOpts().AddPath("/usr/local/lib/clang/3.3/include",
-        clang::frontend::Angled,
         false,
         false);
-    ci.getHeaderSearchOpts().AddPath("/usr/include/x86_64-linux-gnu",
+    ci.getHeaderSearchOpts().AddPath("/opt/pkg/llvm/lib/clang/3.3/include",
         clang::frontend::Angled,
         false,
+        false,
         false);
+   // ci.getHeaderSearchOpts().AddPath("/usr/include/x86_64-linux-gnu",
+   //     clang::frontend::Angled,
+   //     false,
+   //     false,
+   //     false);
     ci.getHeaderSearchOpts().AddPath("/usr/include",
         clang::frontend::Angled,
+        false,
         false,
         false);
 
