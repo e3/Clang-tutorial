@@ -209,7 +209,7 @@ int main (int argc, char* argv[])
     MyASTConsumer *astConsumer = new MyASTConsumer(TheRewriter);
     ci.setASTConsumer(astConsumer);
 
-    const FileEntry *pFile = ci.getFileManager().getFile("foobar.cpp");
+    const FileEntry *pFile = ci.getFileManager().getFile("many_func_if.cpp");
 
     ci.getSourceManager().createMainFileID(pFile);
     ci.getDiagnosticClient().BeginSourceFile(ci.getLangOpts(),
