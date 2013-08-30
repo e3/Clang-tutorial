@@ -9,7 +9,8 @@ CXXFLAGS := $(shell $(LLVMCONFIG) --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell $(LLVMCONFIG) --ldflags --libs $(LLVMCOMPONENTS))
 
 SOURCES = CItutorial6.cpp \
-		  source2source.cpp
+		  source2source.cpp \
+		  sub_traversal.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
