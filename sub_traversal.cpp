@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
@@ -44,21 +45,21 @@ public:
     {}
 
     bool VisitStmt(Stmt *s) {
-        // Only care about If statements.
-        if (isa<IfStmt>(s)) {
-            IfStmt *IfStatement = cast<IfStmt>(s);
-            Stmt *Then = IfStatement->getThen();
-
-            TheRewriter.InsertText(Then->getLocStart(),
-                                   "// the 'if' part\n",
-                                   true, true);
-
-            Stmt *Else = IfStatement->getElse();
-            if (Else)
-                TheRewriter.InsertText(Else->getLocStart(),
-                                       "// the 'else' part\n",
-                                       true, true);
-        }
+//        // Only care about If statements.
+//        if (isa<IfStmt>(s)) {
+//            IfStmt *IfStatement = cast<IfStmt>(s);
+//            Stmt *Then = IfStatement->getThen();
+//
+//            TheRewriter.InsertText(Then->getLocStart(),
+//                                   "// the 'if' part\n",
+//                                   true, true);
+//
+//            Stmt *Else = IfStatement->getElse();
+//            if (Else)
+//                TheRewriter.InsertText(Else->getLocStart(),
+//                                       "// the 'else' part\n",
+//                                       true, true);
+//        }
 
         return true;
     }
@@ -68,30 +69,83 @@ public:
         if (f->hasBody()) {
             Stmt *FuncBody = f->getBody();
 
-            // Type name as string
-            QualType QT = f->getResultType();
-            string TypeStr = QT.getAsString();
+			std::cout << f->getNameAsString() << std::endl;
+			std::cout << "  f->GetNumParams(): " << f->getNumParams() 
+													<< std::endl;
 
-            // Function name
-            DeclarationName DeclName = f->getNameInfo().getName();
-            string FuncName = DeclName.getAsString();
+			if(f->getNameAsString() == "foo")
+				subTreeSearch(f);
 
-            // Add comment before
-            stringstream SSBefore;
-            SSBefore << "// Begin function " << FuncName << " returning "
-                     << TypeStr << "\n";
-            SourceLocation ST = f->getSourceRange().getBegin();
-            TheRewriter.InsertText(ST, SSBefore.str(), true, true);
+           // Type name as string
+           QualType QT = f->getResultType();
+           string TypeStr = QT.getAsString();
 
-            // And after
-            stringstream SSAfter;
-            SSAfter << "\n// End function " << FuncName << "\n";
-            ST = FuncBody->getLocEnd().getLocWithOffset(1);
-            TheRewriter.InsertText(ST, SSAfter.str(), true, true);
+           // Function name
+           DeclarationName DeclName = f->getNameInfo().getName();
+           string FuncName = DeclName.getAsString();
+
+           // Add comment before
+           stringstream SSBefore;
+           SSBefore << "// Begin function " << FuncName << " returning "
+                    << TypeStr << "\n";
+           SourceLocation ST = f->getSourceRange().getBegin();
+           TheRewriter.InsertText(ST, SSBefore.str(), true, true);
+
+           // And after
+           stringstream SSAfter;
+           SSAfter << "\n// End function " << FuncName << "\n";
+           ST = FuncBody->getLocEnd().getLocWithOffset(1);
+           TheRewriter.InsertText(ST, SSAfter.str(), true, true);
         }
 
         return true;
     }
+
+	/// \function subTreeSearch
+	/// \brief This function search of the function call direct or indirect
+	///        a function with the name @param name
+	/// \param f 
+	//         The function declaration of the current analyzed funciton
+	void subTreeSearch(FunctionDecl *f)
+	{
+		std::cout << "Sub tree search starts (" << f->getNameAsString() 
+			<< ")" << std::endl;
+
+		// we get the body of the current function
+		Stmt* body = f->getBody();
+
+		// child_begin is an iterator for all statements in the function body
+		Stmt::child_iterator i = body->child_begin();
+
+		for(Stmt::child_iterator i = body->child_begin(); 
+				i != body->child_end(); i++){
+
+			// Check if the current statement is of the type CallExpr
+			// if yes, this statement describes a function call
+			if (isa<CallExpr>(*i)) {
+
+
+				// Typecast the current StmtIterator i to a CallExpr
+				// The CallExpr provides a function to get the function
+				// declaration of the called function
+				CallExpr* ce = dyn_cast<CallExpr>(*i);
+
+				// If the cast failed the pointer of ce is NULL
+				if(ce == NULL) {
+					return;
+				}
+
+				// we call the subTreeSearch function recursively with the 
+				// function definition of the current fucntion call
+				subTreeSearch(ce->getDirectCallee());
+			}
+
+			std::cout << std::endl;
+		}
+
+		std::cout << "Sub tree search ends (" 
+			<< f->getNameAsString() << ")" << std::endl;
+	}
 
 private:
     void AddBraces(Stmt *s);
@@ -209,7 +263,8 @@ int main (int argc, char* argv[])
     MyASTConsumer *astConsumer = new MyASTConsumer(TheRewriter);
     ci.setASTConsumer(astConsumer);
 
-    const FileEntry *pFile = ci.getFileManager().getFile("many_func_if.cpp");
+    const FileEntry *pFile = 
+		ci.getFileManager().getFile("input_sub_traversal.cpp");
 
     ci.getSourceManager().createMainFileID(pFile);
     ci.getDiagnosticClient().BeginSourceFile(ci.getLangOpts(),
@@ -219,7 +274,7 @@ int main (int argc, char* argv[])
     const RewriteBuffer *RewriteBuf =
         TheRewriter.getRewriteBufferFor(ci.getSourceManager().getMainFileID());
 
-    llvm::outs() << string(RewriteBuf->begin(), RewriteBuf->end());
+//    llvm::outs() << string(RewriteBuf->begin(), RewriteBuf->end());
 
     ci.getDiagnosticClient().EndSourceFile();
 
