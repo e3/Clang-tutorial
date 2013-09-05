@@ -10,7 +10,9 @@ LLVMLDFLAGS := $(shell $(LLVMCONFIG) --ldflags --libs $(LLVMCOMPONENTS))
 
 SOURCES = CItutorial6.cpp \
 		  source2source.cpp \
-		  sub_traversal.cpp
+		  sub_traversal.cpp \
+		  add_function_argument.cpp
+
 
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
