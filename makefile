@@ -1,4 +1,5 @@
 #CXX := clang++
+#CXX := g++ -g
 CXX := /opt/pkg/llvm/bin/clang++
 LLVMCOMPONENTS := cppbackend
 RTTIFLAG := -fno-rtti
@@ -11,7 +12,9 @@ LLVMLDFLAGS := $(shell $(LLVMCONFIG) --ldflags --libs $(LLVMCOMPONENTS))
 SOURCES = CItutorial6.cpp \
 		  source2source.cpp \
 		  sub_traversal.cpp \
-		  add_function_argument.cpp
+		  add_function_argument.cpp \
+		  add_text_via_rewriter.cpp \
+		  rename_text_via_rewriter.cpp
 
 
 OBJECTS = $(SOURCES:.cpp=.o)
